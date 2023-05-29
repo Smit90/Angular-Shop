@@ -16,7 +16,7 @@ import { RouterModule } from "@angular/router";
         RouterModule.forChild(
             [
                 {
-                    path: 'auth',
+                    path: '',
                     component: AuthComponent,
                 }
             ]
