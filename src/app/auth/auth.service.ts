@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, Subject, catchError, tap, throwError } from 'rxjs';
 import { User } from './auth/user.model';
 import { Router } from '@angular/router';
+import { environment } from 'src/environments/environment';
 
 export interface AuthResponseData {
   idToken: string;
@@ -24,7 +25,7 @@ export class AuthService {
   signUp(email: string, password: string) {
     return this.http
       .post<AuthResponseData>(
-        'https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyACyVVko513Pruh854oBTMtgJh1RSj5TuQ',
+        'https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=' + environment.firebaseAPIKey,
         {
           email: email,
           password: password,
@@ -47,7 +48,7 @@ export class AuthService {
   login(email: string, password: string) {
     return this.http
       .post<AuthResponseData>(
-        'https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyACyVVko513Pruh854oBTMtgJh1RSj5TuQ',
+        'https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=' + environment.firebaseAPIKey,
         {
           email: email,
           password: password,
@@ -108,8 +109,8 @@ export class AuthService {
       if (loadedUser.token) {
         this.user.next(loadedUser);
         const expirationDuration =
-          new Date(userData._tokenExpirationDate).getMilliseconds() -
-          new Date().getMilliseconds();
+          new Date(userData._tokenExpirationDate).getTime() -
+          new Date().getTime();
         this.autoLogout(expirationDuration);
       }
     }
@@ -142,8 +143,9 @@ export class AuthService {
     token: string,
     expiresIn: number
   ) {
-    const expirationDate = new Date(new Date().getTime() + expiresIn * 1000);
-    const userData = new User(email, userId, token, expirationDate);
+    const expirationDate = new Date().getTime() + expiresIn * 1000;
+    console.log("🚀 ~ file: auth.service.ts:147 ~ AuthService ~ expirationDate:", expirationDate)
+    const userData = new User(email, userId, token, new Date(expirationDate));
     this.user.next(userData);
     this.autoLogout(expiresIn * 1000);
     localStorage.setItem('userData', JSON.stringify(userData));
